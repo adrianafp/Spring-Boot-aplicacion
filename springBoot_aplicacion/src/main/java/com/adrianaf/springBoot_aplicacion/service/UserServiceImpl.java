@@ -64,4 +64,11 @@ public class UserServiceImpl implements UserService{
 		to.setEmail(from.getEmail());
 		to.setRoles(from.getRoles());
 	}
+
+	@Override
+	public void deleteUser(Long id) throws Exception {
+		User user = userRepository.findById(id) .orElseThrow(()-> new Exception("Usuario no encontrado en deleteUser - "+ this.getClass().getName()));
+		
+		userRepository.delete(user);
+	}
 }
