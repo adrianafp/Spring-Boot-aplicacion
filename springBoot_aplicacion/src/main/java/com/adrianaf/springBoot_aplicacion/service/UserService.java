@@ -1,6 +1,7 @@
 package com.adrianaf.springBoot_aplicacion.service;
 
 
+import com.adrianaf.springBoot_aplicacion.dto.ChangePasswordForm;
 import com.adrianaf.springBoot_aplicacion.entity.User;
 
 
@@ -17,5 +18,5 @@ public interface UserService {
 
 	public void deleteUser(Long id) throws Exception;
 
-
+	public User changePassword(ChangePasswordForm form) throws Exception;
 }

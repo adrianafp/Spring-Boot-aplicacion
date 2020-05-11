@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.adrianaf.springBoot_aplicacion.dto.ChangePasswordForm;
 import com.adrianaf.springBoot_aplicacion.entity.User;
 import com.adrianaf.springBoot_aplicacion.repository.UserRepository;
 
@@ -70,5 +71,26 @@ public class UserServiceImpl implements UserService{
 		User user = userRepository.findById(id) .orElseThrow(()-> new Exception("Usuario no encontrado en deleteUser - "+ this.getClass().getName()));
 		
 		userRepository.delete(user);
+	}
+
+	@Override
+	public User changePassword(ChangePasswordForm form) throws Exception {
+		User storedUser = userRepository.findById(form.getId()) .orElseThrow(() -> new Exception("Usuario no encontrado en ChangePassword - " + this.getClass().getName()));
+
+		if(form.getNewPassword().equals(storedUser.getPassword())) {
+			throw new Exception("Nueva Password incorrecta!");			
+		}
+		
+		if(form.getCurrentPassword().equals(form.getNewPassword())) {
+			throw new Exception("La nueva Password no debe ser igual a la anterior");
+		}
+		
+		if(!form.getNewPassword().equals(form.getConfirmPassword())) {
+			throw new Exception("La password nueva y su confirmacion no coinciden!");
+		}
+		
+		storedUser.setPassword(form.getNewPassword());
+		
+		return userRepository.save(storedUser);
 	}
 }
