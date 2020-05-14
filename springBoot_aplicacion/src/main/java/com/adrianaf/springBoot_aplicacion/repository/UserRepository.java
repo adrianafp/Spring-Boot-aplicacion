@@ -9,8 +9,8 @@ import com.adrianaf.springBoot_aplicacion.entity.User;
 @Repository
 public interface UserRepository extends CrudRepository<User, Long> {
 
-	public Optional<?> findByusername(String username);
+	public Optional<User> findByusername(String username);
 	
-	public Optional<?> findByIdAndPassword(Long id, String password);
+	public Optional<User> findByIdAndPassword(Long id, String password);
 	
 }

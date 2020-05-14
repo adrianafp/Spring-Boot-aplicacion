@@ -77,7 +77,7 @@ public class UserController {
 		model.addAttribute("userForm", user);
 		model.addAttribute("formTab", "active");
 		model.addAttribute("editMode", true);
-		model.addAttribute("passwordForm",new ChangePasswordForm(user.getId()));
+		model.addAttribute("passwordForm",new ChangePasswordForm(id));
 		
 		return "user-form/user-view";
 	}
@@ -142,6 +142,6 @@ public class UserController {
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
-		return ResponseEntity.ok("success");
+		return ResponseEntity.ok("Success");
 	}
 }
