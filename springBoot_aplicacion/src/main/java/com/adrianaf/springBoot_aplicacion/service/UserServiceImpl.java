@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.adrianaf.springBoot_aplicacion.Exceptions.CustomFieldValidationException;
+import com.adrianaf.springBoot_aplicacion.Exceptions.UsernameOrIdNotFound;
 import com.adrianaf.springBoot_aplicacion.dto.ChangePasswordForm;
 import com.adrianaf.springBoot_aplicacion.entity.User;
 import com.adrianaf.springBoot_aplicacion.repository.UserRepository;
@@ -30,17 +32,17 @@ public class UserServiceImpl implements UserService{
 	private Boolean checkUsernameAvaliable(User user) throws Exception{
 		Optional<?> userFound = userRepository.findByusername(user.getUsername());
 		if(userFound.isPresent()) {
-			throw new Exception("username inválido");
+			throw new CustomFieldValidationException("username inválido", "username");
 		}
 		return true;
 	}
 	
 	private Boolean checkPasswordValid(User user) throws Exception{
 		if(user.getConfirmPassword() == null || user.getConfirmPassword().isEmpty()) {
-			throw new Exception("El campo de confirmacion de Password es obligatorio");
+			throw new CustomFieldValidationException("El campo de confirmacion de Password es obligatorio", "confirmPassword");
 		}
 		if(!user.getPassword().equals(user.getConfirmPassword())) {
-			throw new Exception("Password y Confirmación no coinciden");
+			throw new CustomFieldValidationException("Password y Confirmación no coinciden", "password");
 		}
 		return true;
 	}
@@ -55,8 +57,8 @@ public class UserServiceImpl implements UserService{
 		return user;
 	}
 	
-	public User getUserById(Long id) throws Exception{
-		User user = userRepository.findById(id).orElseThrow(() -> new Exception("usuario inexistente"));
+	public User getUserById(Long id) throws UsernameOrIdNotFound{
+		User user = userRepository.findById(id).orElseThrow(() -> new UsernameOrIdNotFound("Id del usuario no encontrado"));
 		return user;
 	}
 
@@ -79,9 +81,8 @@ public class UserServiceImpl implements UserService{
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-	public void deleteUser(Long id) throws Exception {
-		User user = userRepository.findById(id) .orElseThrow(()-> new Exception("Usuario no encontrado en deleteUser - "+ this.getClass().getName()));
-		
+	public void deleteUser(Long id) throws UsernameOrIdNotFound {
+		User user = getUserById(id);
 		userRepository.delete(user);
 	}
 
@@ -103,6 +104,24 @@ public class UserServiceImpl implements UserService{
 		return roles != null ?true :false;
 	}
 	
+	private User getLoggedUser() throws Exception {
+		//Obtener el usuario logeado
+		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		
+		UserDetails loggedUser = null;
+
+		//Verificar que ese objeto traido de sesion es el usuario
+		if (principal instanceof UserDetails) {
+			loggedUser = (UserDetails) principal;
+		}
+		
+		User myUser = userRepository
+				.findByusername(loggedUser.getUsername()).orElseThrow(() -> new Exception(""));
+		
+		return myUser;
+	}
+
+
 	@Override
 	public User changePassword(ChangePasswordForm form) throws Exception {
 		User user = userRepository.findById(form.getId()) .orElseThrow(() -> new Exception("Usuario no encontrado en ChangePassword - " + this.getClass().getName()));
